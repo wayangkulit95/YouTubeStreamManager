@@ -12,7 +12,9 @@ langkah ketiga
 
 sudo npm install -g pm2
 
-pm2 start server.js --name youtube-streamer
+cd youtube-streamer
+
+node server.js 
 
 langkah keempat
 
@@ -24,7 +26,13 @@ edit cookies dalam folder youtube-streamer dan guna cookies youtube kita untuk b
 
 langkah keenam
 
+cd youtube-streamer
+
+pm2 start server.js
+
 reboot vps
+
+
 
 
 edit cookies and paste personal youtube cookies using extention google chrome
