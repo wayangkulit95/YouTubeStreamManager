@@ -1,3 +1,4 @@
+install di os ubuntu
 
 langkah pertama
 
@@ -20,6 +21,10 @@ create dahulu stream m3u8
 langkah kelima
 
 edit cookies dalam folder youtube-streamer dan guna cookies youtube kita untuk bypass signin
+
+langkah keenam
+
+reboot vps
 
 
 edit cookies and paste personal youtube cookies using extention google chrome
