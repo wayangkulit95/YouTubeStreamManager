@@ -1,156 +1,174 @@
 #!/bin/bash
 
-# Update package lists
-echo "Updating package lists..."
+# Update package list
 sudo apt update
 
+# Install Node.js and npm
+sudo apt install -y nodejs npm
+
 # Install FFmpeg
-echo "Installing FFmpeg..."
 sudo apt install -y ffmpeg
 
-# Install Node.js and npm
-echo "Installing Node.js and npm..."
-curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-sudo apt install -y nodejs
+# Install yt-dlp
+sudo apt install -y python3-pip
+pip3 install -U yt-dlp
 
-# Create application directory
-APP_DIR=~/youtube-streamer
-echo "Creating application directory at $APP_DIR..."
-mkdir -p $APP_DIR
-cd $APP_DIR
+# Create project directory
+mkdir -p ~/youtube-streamer
+cd ~/youtube-streamer
 
-# Initialize Node.js project
-echo "Initializing Node.js project..."
-npm init -y
+# Create directories for streams and views
+mkdir -p streams
+mkdir -p views
 
-# Install required Node.js packages
-echo "Installing required Node.js packages..."
-npm install express body-parser ejs fs child_process
-
-# Create server.js file
-cat << 'EOF' > server.js
-const express = require('express');
-const bodyParser = require('body-parser');
-const fs = require('fs');
-const { exec } = require('child_process');
-const path = require('path');
-
-const app = express();
-const PORT = 80; // Change to port 80
-
-// Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static('public'));
-app.set('view engine', 'ejs');
-
-// Data structure to hold stream information
-let streams = [];
-
-// Render the main page
-app.get('/', (req, res) => {
-    res.render('index', { streams });
-});
-
-// Add a new stream
-app.post('/add-stream', (req, res) => {
-    const videoId = req.body.videoId;
-    const streamName = req.body.streamName;
-
-    if (videoId && streamName) {
-        const streamDir = path.join(__dirname, 'streams', streamName);
-        const m3u8File = path.join(streamDir, 'stream.m3u8');
-
-        // Create a directory for the stream
-        fs.mkdirSync(streamDir, { recursive: true });
-
-        // FFmpeg command to capture YouTube stream
-        const command = `ffmpeg -i "https://www.youtube.com/watch?v=${videoId}" -c:v copy -c:a copy -f hls -hls_time 10 -hls_list_size 0 -hls_flags delete_segments "${m3u8File}"`;
-
-        // Start capturing the stream
-        exec(command, { cwd: streamDir }, (error) => {
-            if (error) {
-                console.error(`Error capturing stream: ${error.message}`);
-                return res.status(500).send('Error capturing stream');
-            }
-        });
-
-        streams.push({ name: streamName, videoId, m3u8File });
-        res.redirect('/');
-    } else {
-        res.status(400).send('Missing video ID or stream name');
-    }
-});
-
-// Remove a stream
-app.post('/remove-stream', (req, res) => {
-    const streamName = req.body.streamName;
-    const streamDir = path.join(__dirname, 'streams', streamName);
-
-    if (fs.existsSync(streamDir)) {
-        fs.rmdirSync(streamDir, { recursive: true });
-        streams = streams.filter(stream => stream.name !== streamName);
-        res.redirect('/');
-    } else {
-        res.status(404).send('Stream not found');
-    }
-});
-
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
-EOF
-
-# Create views directory
-mkdir views
-
-# Create index.ejs file
-cat << 'EOF' > views/index.ejs
+# Create index.html file
+cat <<EOL > views/index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Stream Manager</title>
+    <title>YouTube Streamer</title>
 </head>
 <body>
-    <h1>YouTube Stream Manager</h1>
+    <h1>YouTube Live Stream to M3U8</h1>
     <form action="/add-stream" method="POST">
         <input type="text" name="videoId" placeholder="YouTube Video ID" required>
-        <input type="text" name="streamName" placeholder="Stream Name" required>
+        <input type="text" name="streamName" placeholder="Stream Name (optional)">
         <button type="submit">Add Stream</button>
     </form>
-    <h2>Active Streams</h2>
-    <ul>
-        <% streams.forEach(stream => { %>
-            <li>
-                <strong><%= stream.name %></strong>
-                <button onclick="removeStream('<%= stream.name %>')">Remove</button>
-                <br>
-                <a href="http://<%= req.headers.host %>/streams/<%= stream.name %>/stream.m3u8">M3U8 Link</a>
-            </li>
-        <% }); %>
-    </ul>
-
+    <h2>Active Streams:</h2>
+    <ul id="streamList"></ul>
     <script>
-        function removeStream(streamName) {
-            fetch('/remove-stream', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({ streamName }),
-            }).then(() => location.reload());
-        }
+        fetch('/streams').then(response => response.json()).then(data => {
+            const streamList = document.getElementById('streamList');
+            data.forEach(stream => {
+                const li = document.createElement('li');
+                li.innerHTML = \`<strong>\${stream.name}</strong> - <a href="/streams/\${stream.name}/stream.m3u8">M3U8 Link</a>
+                <form action="/remove-stream" method="POST" style="display:inline;">
+                    <input type="hidden" name="streamName" value="\${stream.name}">
+                    <button type="submit">Remove</button>
+                </form>\`;
+                streamList.appendChild(li);
+            });
+        });
     </script>
 </body>
 </html>
-EOF
+EOL
 
-# Create streams directory
-mkdir streams
+# Create server.js file
+cat <<EOL > server.js
+const express = require('express');
+const { exec } = require('child_process');
+const path = require('path');
+const bodyParser = require('body-parser');
+const fs = require('fs');
+const app = express();
+const PORT = 80; // Change to 80 for HTTP
 
-# Make the script executable
-chmod +x install.sh
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-echo "Installation completed. You can now start the server with 'sudo node server.js' in the $APP_DIR directory."
+let streams = [];
+
+// Route for the main page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+
+// Route to add a new stream
+app.post('/add-stream', (req, res) => {
+    const videoId = req.body.videoId;
+    const streamName = req.body.streamName || videoId;
+    const m3u8File = path.join(__dirname, 'streams', \`\${streamName}/stream.m3u8\`);
+
+    if (!fs.existsSync(path.dirname(m3u8File))) {
+        fs.mkdirSync(path.dirname(m3u8File), { recursive: true });
+    }
+
+    // Command to fetch the stream URL using yt-dlp
+    const command = \`yt-dlp --cookies cookies.txt -f "b" -g "https://www.youtube.com/watch?v=\${videoId}"\`;
+
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            console.error(\`Error fetching stream URL: \${error.message}\`);
+            console.error(\`stderr: \${stderr}\`);
+            return res.status(500).send('Error fetching stream URL.');
+        }
+
+        const streamUrl = stdout.trim();
+        if (!streamUrl) {
+            console.error('Stream URL is empty.');
+            return res.status(500).send('Error: Stream URL is empty.');
+        }
+
+        // Start FFmpeg process to convert to M3U8
+        const ffmpegCommand = \`ffmpeg -re -i "\${streamUrl}" -c:v copy -c:a copy -f hls -hls_time 10 -hls_list_size 0 -hls_flags delete_segments "\${m3u8File}"\`;
+        
+        const ffmpegProcess = exec(ffmpegCommand, (ffmpegError, ffmpegStdout, ffmpegStderr) => {
+            if (ffmpegError) {
+                console.error(\`FFmpeg error: \${ffmpegError.message}\`);
+                return res.status(500).send('Error processing stream.');
+            }
+            console.log(\`FFmpeg output: \${ffmpegStdout}\`);
+            streams.push({ name: streamName, m3u8File });
+            res.redirect('/');
+        });
+
+        ffmpegProcess.stdout.on('data', (data) => console.log(\`FFmpeg: \${data}\`));
+        ffmpegProcess.stderr.on('data', (data) => console.error(\`FFmpeg Error: \${data}\`));
+    });
+});
+
+// Route to list streams
+app.get('/streams', (req, res) => {
+    res.json(streams);
+});
+
+// Route to remove a stream
+app.post('/remove-stream', (req, res) => {
+    const streamName = req.body.streamName;
+    const streamIndex = streams.findIndex(stream => stream.name === streamName);
+
+    if (streamIndex >= 0) {
+        streams.splice(streamIndex, 1);
+        const streamPath = path.join(__dirname, 'streams', streamName);
+        fs.rm(streamPath, { recursive: true, force: true }, (err) => {
+            if (err) {
+                console.error(\`Failed to delete stream: \${err}\`);
+            }
+            res.redirect('/');
+        });
+    } else {
+        res.status(404).send('Stream not found.');
+    }
+});
+
+// Route to serve M3U8 file
+app.get('/streams/:name/stream.m3u8', (req, res) => {
+    const streamName = req.params.name;
+    const m3u8File = path.join(__dirname, 'streams', streamName, 'stream.m3u8');
+
+    res.sendFile(m3u8File, (err) => {
+        if (err) {
+            console.error(\`Error sending M3U8 file: \${err}\`);
+            res.status(err.status).end();
+        }
+    });
+});
+
+// Start server
+app.listen(PORT, () => {
+    console.log(\`Server is running on http://localhost:\${PORT}\`);
+});
+EOL
+
+# Create a cookies.txt file (you need to manually add cookies)
+touch cookies.txt
+
+# Install dependencies
+npm init -y
+npm install express body-parser
+
+echo "Setup complete! Please update cookies.txt with your YouTube session cookies."
