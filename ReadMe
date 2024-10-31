@@ -4,6 +4,8 @@ apt install yt-dlp
 
 edit cookies and paste personal youtube cookies using extention google chrome
 
+pm2 start server.js
+
 
 
 Access the web panel: Open your browser and go to http://<your-server-ip>/ to manage your YouTube streams.
