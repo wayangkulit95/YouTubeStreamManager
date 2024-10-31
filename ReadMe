@@ -1,6 +1,26 @@
+
+langkah pertama
+
 '''' bash <(curl -s https://raw.githubusercontent.com/wayangkulit95/YouTubeStreamManager/refs/heads/main/install.sh) ''''
 
+langkah kedua
+
 apt install yt-dlp
+
+langkah ketiga 
+
+sudo npm install -g pm2
+
+pm2 start server.js --name youtube-streamer
+
+langkah keempat
+
+create dahulu stream m3u8
+
+langkah kelima
+
+edit cookies dalam folder youtube-streamer dan guna cookies youtube kita untuk bypass signin
+
 
 edit cookies and paste personal youtube cookies using extention google chrome
 
