@@ -33,6 +33,102 @@ pm2 start server.js
 reboot vps
 
 
+To ensure that your `server.js` application runs automatically after a reboot using PM2, you need to configure PM2 to start your application on system startup. Here are the steps to do that:
+
+### Step 1: Install PM2
+If you haven't already installed PM2 globally, you can do so with the following command:
+
+```bash
+sudo npm install -g pm2
+```
+
+### Step 2: Start Your Application with PM2
+Navigate to your application directory and start your `server.js` file using PM2:
+
+```bash
+cd /root/youtube-streamer
+pm2 start server.js --name "youtube-streamer"
+```
+
+### Step 3: Save the PM2 Process List
+You need to save the current PM2 process list so that it can restore your applications on reboot:
+
+```bash
+pm2 save
+```
+
+### Step 4: Generate Startup Script
+Next, you need to generate a startup script that PM2 can use to launch your applications after a reboot. Run the following command:
+
+```bash
+pm2 startup
+```
+
+This command will output a command that you need to run. It typically looks something like this:
+
+```bash
+sudo env PATH=$PATH:/usr/bin pm2 startup linux -u <your-user> --hp /home/<your-user>
+```
+
+Make sure to replace `<your-user>` with your actual username if needed.
+
+### Step 5: Run the Command
+Copy and paste the command provided by the `pm2 startup` command into your terminal and run it. This sets up the necessary system service for PM2.
+
+### Step 6: Verify the Configuration
+To verify that your application will start on reboot, you can reboot your system:
+
+```bash
+sudo reboot
+```
+
+After your system comes back online, check the status of your PM2 applications with:
+
+```bash
+pm2 list
+```
+
+You should see your `youtube-streamer` application listed and running.
+
+### Additional PM2 Commands
+- To view logs for your application, use:
+  ```bash
+  pm2 logs youtube-streamer
+  ```
+
+- To stop the application, use:
+  ```bash
+  pm2 stop youtube-streamer
+  ```
+
+- To restart the application, use:
+  ```bash
+  pm2 restart youtube-streamer
+  ```
+
+### Summary
+By following these steps, you should be able to successfully configure PM2 to run your `server.js` application automatically after a system reboot. If you encounter any issues, feel free to ask for further assistance!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 edit cookies and paste personal youtube cookies using extention google chrome
