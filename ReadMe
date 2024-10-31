@@ -1,3 +1,6 @@
+'''' bash <(curl -s https://raw.githubusercontent.com/wayangkulit95/YouTubeStreamManager/refs/heads/main/install.sh) ''''
+
+
 Instructions to Run the Script
 Upload the Script: Use scp or any file transfer method to upload the install.sh script to your VPS.
 
