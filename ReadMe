@@ -32,6 +32,10 @@ pm2 start server.js
 
 reboot vps
 
+peringatan
+
+setiap kali reboot mesti kena edit balik cookies.txt dan masukkan cookies youtube kita
+
 
 To ensure that your `server.js` application runs automatically after a reboot using PM2, you need to configure PM2 to start your application on system startup. Here are the steps to do that:
 
