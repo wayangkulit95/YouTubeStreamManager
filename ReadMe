@@ -1,0 +1,29 @@
+Instructions to Run the Script
+Upload the Script: Use scp or any file transfer method to upload the install.sh script to your VPS.
+
+Make the Script Executable: SSH into your server and navigate to the directory where you uploaded the script. Then run:
+
+bash
+Copy code
+chmod +x install.sh
+Run the Script: Execute the script with:
+
+bash
+Copy code
+./install.sh
+Start the Server: Once the installation is complete, navigate to the application directory:
+
+bash
+Copy code
+cd ~/youtube-streamer
+Then start the server (you will need sudo since port 80 requires elevated privileges):
+
+bash
+Copy code
+sudo node server.js
+Access the Web Panel: Open your web browser and go to http://your-server-ip to access the YouTube Stream Manager.
+
+Important Note
+Running on Port 80: Since port 80 is a privileged port, you need to run the server with sudo. Make sure you understand the security implications of running Node.js as root, especially if the server is exposed to the internet.
+Conclusion
+With these changes, your application will run on port 80, making it accessible without specifying a port in the URL. If you have further questions or need additional modifications, feel free to ask!
