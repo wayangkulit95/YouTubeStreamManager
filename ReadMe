@@ -2,6 +2,8 @@
 
 apt install yt-dlp
 
+edit cookies and paste personal youtube cookies using extention google chrome
+
 
 Instructions to Run the Script
 Upload the Script: Use scp or any file transfer method to upload the install.sh script to your VPS.
