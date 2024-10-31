@@ -14,6 +14,57 @@ The server listens on port 80, which may require root privileges to start. You m
 Let me know if you need any further assistance or modifications!
 
 
+Integrating PM2 with Your Setup Script
+If you want to ensure PM2 is part of your existing setup script (setup.sh), you can add the following line after installing Node.js and npm:
+
+bash
+Copy code
+# Install PM2 globally
+sudo npm install -g pm2
+This line should already be in the provided setup.sh script I shared earlier.
+
+Running Your Application with PM2
+If you want to start your server.js script using PM2, you can use:
+
+bash
+Copy code
+pm2 start server.js --name youtube-streamer
+Complete Setup
+To set up PM2 in a complete environment, you can run your setup.sh script after ensuring it's executable:
+
+bash
+Copy code
+chmod +x setup.sh
+./setup.sh
+This will install PM2 and your application will start running under PM2's management.
+
+Let me know if you have any questions or need further assistance!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Instructions to Run the Script
 Upload the Script: Use scp or any file transfer method to upload the install.sh script to your VPS.
 
