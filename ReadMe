@@ -5,6 +5,15 @@ apt install yt-dlp
 edit cookies and paste personal youtube cookies using extention google chrome
 
 
+
+Access the web panel: Open your browser and go to http://<your-server-ip>/ to manage your YouTube streams.
+
+Important Notes
+Ensure that you have valid YouTube session cookies added to the cookies.txt file for successful streaming.
+The server listens on port 80, which may require root privileges to start. You might need to run the server with sudo if you're not running as root.
+Let me know if you need any further assistance or modifications!
+
+
 Instructions to Run the Script
 Upload the Script: Use scp or any file transfer method to upload the install.sh script to your VPS.
 
